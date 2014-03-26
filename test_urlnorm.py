@@ -23,7 +23,7 @@ def pytest_generate_tests(metafunc):
             'http://test.example/?a=%e3%82%82%26': 'http://test.example/?a=\xe3\x82\x82%26'.decode('utf8'), # should return a unicode character
             # note: this breaks the internet for parameters that are positional (stupid nextel) and/or don't have an = sign
             # 'http://test.example/?a=1&b=2&a=3': 'http://test.example/?a=1&a=3&b=2', # should be in sorted/grouped order
-            
+
             # 'http://s.xn--q-bga.de/':       'http://s.q\xc3\xa9.de/'.decode('utf8'), # should be in idna format
             'http://test.example/?':        'http://test.example/', # no trailing ?
             'http://test.example?':       'http://test.example/', # with trailing /
@@ -36,7 +36,7 @@ def pytest_generate_tests(metafunc):
             # u'http://xn--q-bga.XBLA\u306eXbox.com'.encode('utf8'): 'http://q\xc3\xa9.xbla\xe3\x81\xaexbox.com'.decode('utf8'),
             'http://ja.wikipedia.org/wiki/%E3%82%AD%E3%83%A3%E3%82%BF%E3%83%94%E3%83%A9%E3%83%BC%E3%82%B8%E3%83%A3%E3%83%91%E3%83%B3': 'http://ja.wikipedia.org/wiki/\xe3\x82\xad\xe3\x83\xa3\xe3\x82\xbf\xe3\x83\x94\xe3\x83\xa9\xe3\x83\xbc\xe3\x82\xb8\xe3\x83\xa3\xe3\x83\x91\xe3\x83\xb3'.decode('utf8'),
             'http://test.example/\xe3\x82\xad': 'http://test.example/\xe3\x82\xad',
-            
+
             # check that %23 (#) is not escaped where it shouldn't be
             'http://test.example/?p=%23val#test-%23-val%25': 'http://test.example/?p=%23val#test-%23-val%25',
             # check that %20 or %25 is not unescaped to ' ' or %
@@ -49,13 +49,16 @@ def pytest_generate_tests(metafunc):
             "http://[::ffff:192.168.1.1]:80/test" : "http://[::ffff:192.168.1.1]/test", # ipv4 address in ipv6 notation
             "htTps://[::fFff:192.168.1.1]:443/test" : "https://[::ffff:192.168.1.1]/test", # ipv4 address in ipv6 notation
 
-            # python 2.5 urlparse doesn't handle unknown protocols, so skipping this for now
-            #"itms://itunes.apple.com/us/app/touch-pets-cats/id379475816?mt=8#23161525,,1293732683083,260430,tw" : "itms://itunes.apple.com/us/app/touch-pets-cats/id379475816?mt=8#23161525,,1293732683083,260430,tw", #can handle itms://
+            'http://localhost/': 'http://localhost/',
+            'http://localhost:8080/': 'http://localhost:8080/',
+            'homefeedapps://pinterest/': 'homefeedapps://pinterest/', # can handle Android deep link
+            'mailto:me@pinterest.com': 'mailto:me@pinterest.com', # can handle mailto:
+            "itms://itunes.apple.com/us/app/touch-pets-cats/id379475816?mt=8#23161525,,1293732683083,260430,tw" : "itms://itunes.apple.com/us/app/touch-pets-cats/id379475816?mt=8#23161525,,1293732683083,260430,tw", #can handle itms://
 
         }
         for bad, good in tests.items():
             metafunc.addcall(funcargs=dict(bad=bad, good=good))
-    
+
     elif metafunc.function == test_unquote:
         for bad, good, unsafe in (
             ('%20', ' ', ''),
@@ -63,10 +66,9 @@ def pytest_generate_tests(metafunc):
             ('%E3%82%AD', u'\u30ad', ''),
             ):
             metafunc.addcall(funcargs=dict(bad=bad, good=good, unsafe=unsafe))
-    
+
     elif metafunc.function in [test_invalid_urls]:
         for url in [
-            'http://http://www.exemple.com/', # invalid domain
             '-',
             'asdf',
             'HTTP://4294967297/test', # one more than max ip > int
