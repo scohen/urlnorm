@@ -71,6 +71,7 @@ def pytest_generate_tests(metafunc):
         for url in [
             '-',
             'asdf',
+            'http://./',
             'HTTP://4294967297/test', # one more than max ip > int
             'http://[img]http://i790.photobucket.com/albums/yy185/zack-32009/jordan.jpg[/IMG]',
             ]:

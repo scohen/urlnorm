@@ -208,6 +208,10 @@ def norm_netloc(scheme, netloc):
     if host[-1] == '.':
         host = host[:-1]
 
+    # bracket check is for ipv6 hosts
+    if not host or ('.' not in host and not (host[0] == '[' and host[-1] == ']')):
+        raise InvalidUrl('host %r is not valid' % host)
+
     authority = lower(host)
     if 'xn--' in authority:
         subdomains = [_idn(subdomain) for subdomain in authority.split('.')]
